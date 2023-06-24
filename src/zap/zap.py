@@ -98,7 +98,7 @@ def process(
     n_components=None,
     overwrite=False,
     varcurvefits=None,
-    zero_nan_slices=False,
+    zero_nan_slices=True,
 ):
     """Performs the entire ZAP sky subtraction algorithm.
 
@@ -394,7 +394,7 @@ class Zap:
         NaNs have been set to zero
     """
 
-    def __init__(self, cubefits, pca_class=None, n_components=None, zero_nan_slices=False):
+    def __init__(self, cubefits, pca_class=None, n_components=None, zero_nan_slices=True):
         self.cubefits = cubefits
         self.ins_mode = None
 
