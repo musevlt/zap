@@ -98,6 +98,7 @@ def process(
     n_components=None,
     overwrite=False,
     varcurvefits=None,
+    zero_nan_slices=False,
 ):
     """Performs the entire ZAP sky subtraction algorithm.
 
@@ -158,7 +159,13 @@ def process(
         to False.
     varcurvefits : str
         Path for the optional output of the explained variance curves.
-
+    zero_nan_slices : bool
+        In cases where we use a fixed OUTWCS it is very easy that the data
+        end up having slices with only NaNs. These should be zero'd in the
+        same way as the AO gaps. If this is set to True, this will be done. It
+        goes through the whole cube - under normal conditions the NaN-only
+        layers should be at the start and end, but this way we can deal with
+        corner cases.
     """
     logger.info("Running ZAP %s !", __version__)
     t0 = time()
@@ -199,7 +206,8 @@ def process(
             mask=mask,
         )
 
-    zobj = Zap(cubefits, pca_class=pca_class, n_components=n_components)
+    zobj = Zap(cubefits, pca_class=pca_class, n_components=n_components,
+               zero_nan_slices=zero_nan_slices)
     zobj._run(
         clean=clean,
         zlevel=zlevel,
@@ -381,10 +389,12 @@ class Zap:
         deconstructed stack
     zlsky : numpy.ndarray
         A 1d array containing the result of the zero level subtraction
-
+    zeroed_nan_slices : list
+        If zero_nan_slices is True, this list records the slices where
+        NaNs have been set to zero
     """
 
-    def __init__(self, cubefits, pca_class=None, n_components=None):
+    def __init__(self, cubefits, pca_class=None, n_components=None, zero_nan_slices=False):
         self.cubefits = cubefits
         self.ins_mode = None
 
@@ -428,6 +438,20 @@ class Zap:
             self.cube[lmin : lmax + 1] = 0.0
         else:
             self.notch_limits = None
+
+        # Zero other NaN slices if requested.
+        self.zeroed_nan_slices = []
+        if zero_nan_slices:
+            logger.info('Zeroing slices with only NaNs')
+            nl, ny, nx = self.cube.shape
+            for i in range(nl):
+                # Check whether there are any finite values. If not,
+                # set the whole slice to zero
+                is_finite = np.where(np.isfinite(self.cube[i, :, :]))
+                if len(is_finite[0]) == 0:
+                    self.cube[i, :, :] = 0.0
+                    self.zeroed_nan_slices.append(i)
+
 
         # NaN Cleaning
         self.run_clean = False
@@ -797,6 +821,9 @@ class Zap:
         if self.ins_mode in NOTCH_FILTER_RANGES:
             lmin, lmax = self.notch_limits
             cube[lmin : lmax + 1] = np.nan
+        if len(self.zeroed_nan_slices) > 0:
+            for i in self.zeroed_nan_slices:
+                cube[i, :, :] = np.nan
         return cube
 
     def remold(self):
