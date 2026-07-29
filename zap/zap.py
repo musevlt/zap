@@ -38,15 +38,10 @@ from scipy.stats import sigmaclip
 from sklearn.decomposition import PCA
 from time import time
 
-from pkg_resources import get_distribution, DistributionNotFound
-try:
-    __version__ = get_distribution('zap').version
-except DistributionNotFound:
-    # package is not installed
-    __version__ = None
+from zap._version import __version__
 
 __all__ = ['process', 'SVDoutput', 'nancleanfits', 'contsubfits', 'Zap',
-           'SKYSEG', '__version__']
+           'SKYSEG']
 
 # Limits of the segments in Angstroms. Zap now uses by default only one
 # segment, based on the cube wavelength's min and max.  See below for the

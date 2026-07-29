@@ -4,7 +4,8 @@ import argparse
 import logging
 import sys
 
-from zap.zap import process, CFTYPE_OPTIONS, __version__
+from zap.zap import process, CFTYPE_OPTIONS
+from zap._version import __version__
 
 
 def main():
