@@ -30,7 +30,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-plot = ["matplotlib"]
+all = ["matplotlib"]
+docs = ["sphinx", "sphinx-copybutton", "furo"]
+tests = ["pytest"]
 
 [project.scripts]
 zap = "zap.__main__:main"
