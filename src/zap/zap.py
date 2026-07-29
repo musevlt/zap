@@ -88,7 +88,7 @@ def process(
     cftype="median",
     cfwidthSVD=300,
     cfwidthSP=300,
-    nevals=[],
+    nevals=(),
     extSVD=None,
     skycubefits=None,
     mask=None,
@@ -130,7 +130,7 @@ def process(
         features for calculating the eigenvalues per spectrum. Smaller values
         better trace the sources. An optimal range of is typically
         20 - 50 pixels. Default to 300.
-    nevals : list
+    nevals : tuple or list
         Allow to specify the number of eigenspectra used for each segment.
         Provide either a single value that will be used for all of the
         segments, or a list of 11 values that will be used for each of the
@@ -526,7 +526,7 @@ class Zap:
         zlevel="median",
         cftype="median",
         cfwidth=300,
-        nevals=[],
+        nevals=(),
         extSVD=None,
     ):
         """Perform all steps to ZAP a datacube:
@@ -556,7 +556,7 @@ class Zap:
 
         # choose some fraction of eigenspectra or some finite number of
         # eigenspectra
-        if nevals == []:
+        if nevals == ():
             self.optimize()
             self.chooseevals(nevals=self.nevals)
         else:
@@ -675,10 +675,10 @@ class Zap:
         else:
             if cftype == "fit" and self.instrument != "MUSE":
                 warnings.warn(
-                    "the continuum fit method is currently adapted "
-                    "to MUSE and should not be used for other "
-                    "instruments",
+                    "the continuum fit method is currently adapted to MUSE "
+                    "and should not be used for other instruments",
                     UserWarning,
+                    stacklevel=2,
                 )
 
             self.contarray = _continuumfilter(
@@ -729,7 +729,7 @@ class Zap:
 
             self.models.append(self.pca_class(n_components=ncomp).fit(x))
 
-    def chooseevals(self, nevals=[]):
+    def chooseevals(self, nevals=()):
         """Choose the number of eigenspectra/evals to use for reconstruction.
 
         User supplies the number of eigen spectra to be used (neval) or the
@@ -777,8 +777,11 @@ class Zap:
         indices = [x[0] for x in self.pranges[1:]]
         # normstack = self.stack - self.contarray
         Xarr = np.array_split(self.normstack.T, indices, axis=1)
-        Xnew = [model.transform(x) for model, x in zip(self.models, Xarr)]
-        Xinv = [model.inverse_transform(x) for model, x in zip(self.models, Xnew)]
+        Xnew = [model.transform(x) for model, x in zip(self.models, Xarr, strict=True)]
+        Xinv = [
+            model.inverse_transform(x)
+            for model, x in zip(self.models, Xnew, strict=True)
+        ]
         self.recon = np.concatenate(
             [x.T * self.variancearray[i, :] for i, x in enumerate(Xinv)]
         )
@@ -805,7 +808,7 @@ class Zap:
             self.stack - self.recon, with_nans=self.run_clean
         )
 
-    def reprocess(self, nevals=[]):
+    def reprocess(self, nevals=()):
         """A method that redoes the eigenvalue selection, reconstruction, and
         remolding of the data.
         """

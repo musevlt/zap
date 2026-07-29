@@ -68,7 +68,7 @@ def main():
     if args.nevals is not None:
         nevals = [int(x) for x in args.nevals.split(",")]
     else:
-        nevals = []
+        nevals = ()
 
     try:
         process(

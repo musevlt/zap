@@ -47,6 +47,7 @@ version_file = "src/zap/_version.py"
 [tool.ruff.lint]
 select = [
   "E", "F", "W", # flake8
+  "B",           # bugbear
   "I",           # isort
   "UP",          # pyupgrade
 ]
