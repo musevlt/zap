@@ -2,8 +2,8 @@ import argparse
 import logging
 import sys
 
-from zap.zap import process, CFTYPE_OPTIONS
 from zap._version import __version__
+from zap.zap import CFTYPE_OPTIONS, process
 
 
 def main():
@@ -64,7 +64,7 @@ def main():
         if args.debug:
             import traceback
             traceback.print_exc()
-        sys.exit('Failed to process file: %s' % e)
+        sys.exit(f'Failed to process file: {e}')
 
 
 if __name__ == "__main__":

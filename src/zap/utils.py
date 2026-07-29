@@ -1,4 +1,5 @@
 import logging
+
 import numpy as np
 from astropy.io import fits
 from scipy import ndimage as ndi
@@ -49,7 +50,7 @@ def mask_nan_edges(cube, outfile=None, plot=False, threshold=50,
     labels, nlabels = ndi.label(mask)
 
     if nlabels > 0:
-        area = [np.sum(mask[labels == l]) for l in range(1, nlabels + 1)]
+        area = [np.sum(mask[labels == i]) for i in range(1, nlabels + 1)]
         mask = labels == (np.argmax(area) + 1)
         logger.info('%i label(s), selected one contain %i pixels', nlabels,
                     np.sum(mask))

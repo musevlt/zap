@@ -22,26 +22,32 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import astropy.units as u
 import logging
-import numpy as np
 import os
-import scipy.ndimage as ndi
 import sys
 import warnings
+from functools import wraps
+from multiprocessing import Manager, Process, cpu_count
+from time import time
 
+import astropy.units as u
+import numpy as np
+import scipy.ndimage as ndi
 from astropy.io import fits
 from astropy.wcs import WCS
-from functools import wraps
-from multiprocessing import cpu_count, Manager, Process
 from scipy.stats import sigmaclip
 from sklearn.decomposition import PCA
-from time import time
 
 from zap._version import __version__
 
-__all__ = ['process', 'SVDoutput', 'nancleanfits', 'contsubfits', 'Zap',
-           'SKYSEG']
+__all__ = [
+    'SKYSEG',
+    'SVDoutput',
+    'Zap',
+    'contsubfits',
+    'nancleanfits',
+    'process',
+]
 
 # Limits of the segments in Angstroms. Zap now uses by default only one
 # segment, based on the cube wavelength's min and max.  See below for the
@@ -148,7 +154,7 @@ def process(cubefits, outcubefits='DATACUBE_ZAP.fits', clean=True,
     if not overwrite:
         def _check_file_exists(filename):
             if filename is not None and os.path.exists(filename):
-                raise IOError('Output file "{0}" exists'.format(filename))
+                raise OSError(f'Output file "{filename}" exists')
 
         _check_file_exists(outcubefits)
         _check_file_exists(skycubefits)
@@ -284,7 +290,7 @@ def timeit(func):
 
 # ================= Main class =================
 
-class Zap(object):
+class Zap:
 
     """ Main class to run each of the steps of ZAP.
 
@@ -344,14 +350,11 @@ class Zap(object):
                 self.ins_mode = hdul[0].header.get('HIERARCH ESO INS MODE')
                 self.cube = hdul[1].data
                 self.header = hdul[1].header
-            elif self.instrument == 'KCWI':
-                self.cube = hdul[0].data
-                self.header = hdul[0].header
-            elif self.instrument == 'FOCAS':
+            elif self.instrument == 'KCWI' or self.instrument == 'FOCAS':
                 self.cube = hdul[0].data
                 self.header = hdul[0].header
             else:
-                raise ValueError('unsupported instrument %s' % self.instrument)
+                raise ValueError(f'unsupported instrument {self.instrument}')
 
         # Workaround for floating points errors in wcs computation: if cunit is
         # specified, wcslib will convert in meters instead of angstroms, so we
@@ -594,8 +597,8 @@ class Zap(object):
 
         """
         if cftype not in CFTYPE_OPTIONS:
-            raise ValueError("cftype must be median, fit or none, got {}"
-                             .format(cftype))
+            raise ValueError(f"cftype must be median, fit or none, got {cftype}"
+                             )
         logger.info('Applying Continuum Filter, cftype=%s', cftype)
         self._cftype = cftype
         self._cfwidth = cfwidth
@@ -813,14 +816,11 @@ class Zap(object):
             if self.instrument == 'MUSE':
                 hdu[1].header = _newheader(self)
                 hdu[1].data = self.cleancube
-            elif self.instrument == 'KCWI':
-                hdu[0].header = _newheader(self)
-                hdu[0].data = self.cleancube
-            elif self.instrument == 'FOCAS':
+            elif self.instrument == 'KCWI' or self.instrument == 'FOCAS':
                 hdu[0].header = _newheader(self)
                 hdu[0].data = self.cleancube
             else:
-                raise ValueError('unsupported instrument %s' % self.instrument)
+                raise ValueError(f'unsupported instrument {self.instrument}')
 
             hdu.writeto(outcubefits, overwrite=overwrite)
         logger.info('Cube file saved to %s', outcubefits)
@@ -851,8 +851,8 @@ class Zap(object):
         ax3.set_ylabel('(d^2/dn^2) Var')
         # ax3.set_xlabel('Number of Components')
 
-        ax1.set_title('Segment {0}, {1} - {2} Angstroms'.format(
-            i, self.lranges[i][0], self.lranges[i][1]))
+        ax1.set_title(f'Segment {i}, '
+                      f'{self.lranges[i][0]} - {self.lranges[i][1]} Angstroms')
 
     def plotvarcurves(self):
         nseg = len(self.models)
@@ -1004,10 +1004,10 @@ def _newheader(zobj, header=None):
     # per segment variables
     if hasattr(zobj, 'nevals'):
         for i in range(nseg):
-            header['ZAPseg{}'.format(i)] = (
-                '{}:{}'.format(zobj.pranges[i][0], zobj.pranges[i][1] - 1),
+            header[f'ZAPseg{i}'] = (
+                f'{zobj.pranges[i][0]}:{zobj.pranges[i][1] - 1}',
                 'spectrum segment (pixels)')
-            header['ZAPnev{}'.format(i)] = (zobj.nevals[i],
+            header[f'ZAPnev{i}'] = (zobj.nevals[i],
                                             'number of eigenvals/spectra used')
 
     return header
@@ -1056,7 +1056,7 @@ def _nanclean(cube, rejectratio=0.25, boxsz=1):
     nz, ny, nx = cleancube.shape
     for j in range(-boxsz, boxsz + 1, 1):
         for k in range(-boxsz, boxsz + 1, 1):
-            for l in range(-boxsz, boxsz + 1, 1):
+            for l in range(-boxsz, boxsz + 1, 1): # noqa: E741
                 iz, iy, ix = z + l, y + k, x + j
                 outsider = ((ix <= 0) | (ix >= nx - 1) |
                             (iy <= 0) | (iy >= ny - 1) |

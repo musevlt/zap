@@ -43,3 +43,17 @@ github = "https://github.com/musevlt/zap"
 
 [tool.setuptools_scm]
 version_file = "src/zap/_version.py"
+
+[tool.ruff.lint]
+select = [
+  "E", "F", "W", # flake8
+  "I",           # isort
+  "UP",          # pyupgrade
+]
+# ignore = ["E731"]
+unfixable = [
+  "F841", # Removes unused variables
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sigal"]

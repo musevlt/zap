@@ -27,8 +27,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'zap'
-copyright = u'2014-2016, Kurt Soto, Simon Conseil'
+project = 'zap'
+copyright = '2014-2016, Kurt Soto, Simon Conseil'
 
 release = __version__
 version = __version__
