@@ -1,0 +1,46 @@
+[build-system]
+requires = [ "setuptools>=77.0.0", "setuptools_scm>=8.0.0" ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zap"
+description = "ZAP (the Zurich Atmosphere Purge) is a high precision sky subtraction tool"
+readme = "README.rst"
+authors = [
+    {name = "Kurt Soto", email = "sotok@phys.ethz.ch"},
+    {name = "Simon Conseil", email = "simon.conseil@univ-lyon1.fr"},
+]
+keywords = ["astronomy", "astrophysics", "science", "muse", "vlt", "sky subtraction"]
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "astropy",
+    "numpy",
+    "scikit-learn",
+    "scipy",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+plot = ["matplotlib"]
+
+[project.scripts]
+zap = "zap.__main__:main"
+
+[project.urls]
+documentation = "https://zap.readthedocs.io"
+github = "https://github.com/musevlt/zap"
+
+[tool.setuptools.packages]
+find = {namespaces = false}
+
+[tool.setuptools_scm]
+version_file = "zap/_version.py"

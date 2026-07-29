@@ -3,7 +3,5 @@
 .eggs/
 build/
 dist/
-doc/_build/
-zap/#zap.py#
-zap/.#zap.py
-zap/_githash.py
+_build/
+_version.py
