@@ -41,8 +41,5 @@ zap = "zap.__main__:main"
 documentation = "https://zap.readthedocs.io"
 github = "https://github.com/musevlt/zap"
 
-[tool.setuptools.packages]
-find = {namespaces = false}
-
 [tool.setuptools_scm]
-version_file = "zap/_version.py"
+version_file = "src/zap/_version.py"
