@@ -5,7 +5,7 @@
 
 import nox
 
-nox.needs_version = "2025.10.14"
+nox.needs_version = ">= 2025.10.14"
 nox.options.default_venv_backend = "uv|virtualenv"
 nox.options.reuse_venv = "yes"
 
