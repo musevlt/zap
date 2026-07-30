@@ -166,6 +166,7 @@ def process(
         goes through the whole cube - under normal conditions the NaN-only
         layers should be at the start and end, but this way we can deal with
         corner cases.
+
     """
     logger.info("Running ZAP %s !", __version__)
     t0 = time()
@@ -206,8 +207,12 @@ def process(
             mask=mask,
         )
 
-    zobj = Zap(cubefits, pca_class=pca_class, n_components=n_components,
-               zero_nan_slices=zero_nan_slices)
+    zobj = Zap(
+        cubefits,
+        pca_class=pca_class,
+        n_components=n_components,
+        zero_nan_slices=zero_nan_slices,
+    )
     zobj._run(
         clean=clean,
         zlevel=zlevel,
@@ -392,9 +397,12 @@ class Zap:
     zeroed_nan_slices : list
         If zero_nan_slices is True, this list records the slices where
         NaNs have been set to zero
+
     """
 
-    def __init__(self, cubefits, pca_class=None, n_components=None, zero_nan_slices=True):
+    def __init__(
+        self, cubefits, pca_class=None, n_components=None, zero_nan_slices=True
+    ):
         self.cubefits = cubefits
         self.ins_mode = None
 
@@ -440,18 +448,15 @@ class Zap:
             self.notch_limits = None
 
         # Zero other NaN slices if requested.
-        self.zeroed_nan_slices = []
         if zero_nan_slices:
-            logger.info('Zeroing slices with only NaNs')
-            nl, ny, nx = self.cube.shape
-            for i in range(nl):
-                # Check whether there are any finite values. If not,
-                # set the whole slice to zero
-                is_finite = np.where(np.isfinite(self.cube[i, :, :]))
-                if len(is_finite[0]) == 0:
-                    self.cube[i, :, :] = 0.0
-                    self.zeroed_nan_slices.append(i)
-
+            # Check whether there are any finite values. If not,
+            # set the whole slice to zero
+            nan_slices = np.isfinite(self.cube).sum(axis=(1, 2)) == 0
+            self.cube[nan_slices] = 0.0
+            self.zeroed_nan_slices = np.where(nan_slices)[0].tolist()
+            logger.info("Zeroing slices with only NaNs: %r", self.zeroed_nan_slices)
+        else:
+            self.zeroed_nan_slices = []
 
         # NaN Cleaning
         self.run_clean = False
@@ -816,14 +821,17 @@ class Zap:
         """Stuff the stack back into a cube."""
         cube = self.cube.copy()
         cube[:, self.y, self.x] = stack
+
         if with_nans:
             cube[self.nancube] = np.nan
+
         if self.ins_mode in NOTCH_FILTER_RANGES:
             lmin, lmax = self.notch_limits
             cube[lmin : lmax + 1] = np.nan
-        if len(self.zeroed_nan_slices) > 0:
-            for i in self.zeroed_nan_slices:
-                cube[i, :, :] = np.nan
+
+        if self.zeroed_nan_slices:
+            cube[self.zeroed_nan_slices] = np.nan
+
         return cube
 
     def remold(self):
