@@ -1,3 +1,4 @@
+#!/usr/bin/env -S uv run --script
 # /// script
 # dependencies = ["nox"]
 # ///
@@ -5,9 +6,10 @@
 import nox
 
 nox.needs_version = "2025.10.14"
+nox.options.default_venv_backend = "uv|virtualenv"
 nox.options.reuse_venv = "yes"
 
-pytest_args = ("-rs", )
+pytest_args = ("-rs",)
 
 
 def install(session):
@@ -45,3 +47,7 @@ def docs(session):
             "_build/html",
         )
         # fmt: on
+
+
+if __name__ == "__main__":
+    nox.main()

@@ -41,6 +41,9 @@ zap = "zap.__main__:main"
 documentation = "https://zap.readthedocs.io"
 github = "https://github.com/musevlt/zap"
 
+[tool.setuptools_scm]
+version_file = "src/zap/_version.py"
+
 [tool.pytest]
 minversion = "9.0"
 testpaths = ["tests"]
@@ -77,8 +80,8 @@ exclude_lines = [
     "except ImportError",
 ]
 
-[tool.setuptools_scm]
-version_file = "src/zap/_version.py"
+[tool.repo-review]
+ignore = ["MY", "PC", "PP006"]
 
 [tool.ruff.lint]
 select = [
