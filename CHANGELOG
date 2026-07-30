@@ -1,7 +1,10 @@
-2.2.dev (2019-xx-xx)
---------------------
+2.2 (2026-07-30)
+----------------
 
 - Add support for Subaru/FOCAS.
+
+- Add a ``zero_nan_slices`` argument to allow for setting slices with only
+  NaNs to zero.
 
 2.1 (2019-07-03)
 ----------------
