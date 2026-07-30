@@ -32,7 +32,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 all = ["matplotlib"]
 docs = ["sphinx", "sphinx-copybutton", "furo"]
-tests = ["pytest"]
+tests = ["pytest", "coverage", "mpdaf"]
 
 [project.scripts]
 zap = "zap.__main__:main"
@@ -40,6 +40,42 @@ zap = "zap.__main__:main"
 [project.urls]
 documentation = "https://zap.readthedocs.io"
 github = "https://github.com/musevlt/zap"
+
+[tool.pytest]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+log_level = "INFO"
+strict = true
+filterwarnings = [
+    # action:message:category:module:lineno
+    "error",
+]
+
+[tool.coverage.run]
+source = ["zap"]
+omit = [
+    "*/zap/__init__*",
+    "*/zap/**/conftest.py",
+    "*/zap/**/setup*",
+    "*/zap/**/tests/*",
+    "*/zap/_version*",
+    "*/zap/scripts/update_license.py",
+]
+
+[tool.coverage.paths]
+source = ["lib", "*/site-packages"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "except KeyboardInterrupt",
+    "except ImportError",
+]
 
 [tool.setuptools_scm]
 version_file = "src/zap/_version.py"
