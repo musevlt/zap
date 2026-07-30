@@ -1,0 +1,99 @@
+[build-system]
+requires = [ "setuptools>=77.0.0", "setuptools_scm>=8.0.0" ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zap"
+description = "ZAP (the Zurich Atmosphere Purge) is a high precision sky subtraction tool"
+readme = "README.rst"
+authors = [
+    {name = "Kurt Soto", email = "sotok@phys.ethz.ch"},
+    {name = "Simon Conseil", email = "simon.conseil@univ-lyon1.fr"},
+]
+keywords = ["astronomy", "astrophysics", "science", "muse", "vlt", "sky subtraction"]
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "astropy",
+    "numpy",
+    "scikit-learn",
+    "scipy",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+all = ["matplotlib"]
+docs = ["sphinx", "sphinx-copybutton", "furo"]
+tests = ["pytest", "coverage", "mpdaf"]
+
+[project.scripts]
+zap = "zap.__main__:main"
+
+[project.urls]
+documentation = "https://zap.readthedocs.io"
+github = "https://github.com/musevlt/zap"
+
+[tool.setuptools_scm]
+version_file = "src/zap/_version.py"
+
+[tool.pytest]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+log_level = "INFO"
+strict = true
+filterwarnings = [
+    # action:message:category:module:lineno
+    "error",
+]
+
+[tool.coverage.run]
+source = ["zap"]
+omit = [
+    "*/zap/__init__*",
+    "*/zap/**/conftest.py",
+    "*/zap/**/setup*",
+    "*/zap/**/tests/*",
+    "*/zap/_version*",
+    "*/zap/scripts/update_license.py",
+]
+
+[tool.coverage.paths]
+source = ["lib", "*/site-packages"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "except KeyboardInterrupt",
+    "except ImportError",
+]
+
+[tool.repo-review]
+ignore = ["MY", "PC", "PP006"]
+
+[tool.ruff.lint]
+select = [
+  "E", "F", "W", # flake8
+  "B",           # bugbear
+  "I",           # isort
+  "UP",          # pyupgrade
+]
+# ignore = ["E731"]
+unfixable = [
+  "F841", # Removes unused variables
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sigal"]

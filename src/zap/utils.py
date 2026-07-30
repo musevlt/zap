@@ -1,13 +1,13 @@
 import logging
+
 import numpy as np
 from astropy.io import fits
 from scipy import ndimage as ndi
 
-__all__ = ['mask_nan_edges']
+__all__ = ["mask_nan_edges"]
 
 
-def mask_nan_edges(cube, outfile=None, plot=False, threshold=50,
-                   extname='DATA'):
+def mask_nan_edges(cube, outfile=None, plot=False, threshold=50, extname="DATA"):
     """Mask the edges of a cube, using the number of nans in a spaxel.
 
     At the edges of MUSE cubes, spaxels can contain many NaNs in the spectral
@@ -49,12 +49,13 @@ def mask_nan_edges(cube, outfile=None, plot=False, threshold=50,
     labels, nlabels = ndi.label(mask)
 
     if nlabels > 0:
-        area = [np.sum(mask[labels == l]) for l in range(1, nlabels + 1)]
+        area = [np.sum(mask[labels == i]) for i in range(1, nlabels + 1)]
         mask = labels == (np.argmax(area) + 1)
-        logger.info('%i label(s), selected one contain %i pixels', nlabels,
-                    np.sum(mask))
+        logger.info(
+            "%i label(s), selected one contain %i pixels", nlabels, np.sum(mask)
+        )
     else:
-        logger.warning('Nothing masked')
+        logger.warning("Nothing masked")
         return mask, data
 
     if plot:
@@ -62,8 +63,7 @@ def mask_nan_edges(cube, outfile=None, plot=False, threshold=50,
 
     if outfile is not None:
         if not isinstance(cube, str):
-            raise ValueError('cannot save the file if the output was given '
-                             'as ndarray')
+            raise ValueError("cannot save the file if the output was given as ndarray")
 
         logger.info("Save cube to %s", outfile)
         with fits.open(cube) as hdul:
@@ -81,12 +81,11 @@ def mask_nan_edges(cube, outfile=None, plot=False, threshold=50,
 
         fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
         vmin, vmax = (mean - 1), (mean + 1)
-        ax1.imshow(imorig, vmin=vmin, vmax=vmax, origin='lower')
-        ax1.set_title('Input image')
-        ax2.imshow(im, vmin=vmin, vmax=vmax, origin='lower')
-        ax2.set_title('Masked image')
-        ax3.imshow(np.isnan(im) ^ np.isnan(imorig), cmap='binary',
-                   origin='lower')
-        ax3.set_title('Masked pixels')
+        ax1.imshow(imorig, vmin=vmin, vmax=vmax, origin="lower")
+        ax1.set_title("Input image")
+        ax2.imshow(im, vmin=vmin, vmax=vmax, origin="lower")
+        ax2.set_title("Masked image")
+        ax3.imshow(np.isnan(im) ^ np.isnan(imorig), cmap="binary", origin="lower")
+        ax3.set_title("Masked pixels")
 
     return mask, data

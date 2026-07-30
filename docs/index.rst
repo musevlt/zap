@@ -31,8 +31,6 @@ Please cite ZAP as::
         Soto, K.~T., Lilly, S.~J., Bacon, R., Richard, J., \& Conseil, S.
         2016, \mnras, 458, 3210
 
-.. contents::
-
 Installation
 ============
 

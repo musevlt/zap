@@ -1,5 +1,0 @@
-astropy
-numpy
-numpydoc
-scipy
-scikit-learn
